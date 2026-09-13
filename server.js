@@ -3,7 +3,7 @@
  * Serves static files + Agentic AI API endpoint (IBM Granite via watsonx.ai)
  *
  * SETUP:
- *   1. Set environment variables (or edit the CONFIGURE HERE block below):
+ *   1. Edit .env in the project root and set your IBM credentials:
  *        IBM_API_KEY      — your IBM Cloud API key
  *        IBM_PROJECT_ID   — your watsonx.ai project ID
  *   2. Run: node server.js
@@ -19,10 +19,34 @@ const path  = require('path');
 const url   = require('url');
 
 // ──────────────────────────────────────────────────────────────
-//  ▶  CONFIGURE HERE  ◀  (or set as environment variables)
+//  .ENV LOADER  (built-in — no dotenv package required)
+//  Reads .env from the project root and injects into process.env
+//  before any other config is read. Existing env vars take priority.
 // ──────────────────────────────────────────────────────────────
-const IBM_API_KEY    = process.env.IBM_API_KEY    || 'YOUR_IBM_API_KEY_HERE';
-const IBM_PROJECT_ID = process.env.IBM_PROJECT_ID || 'YOUR_IBM_PROJECT_ID_HERE';
+(function loadDotEnv() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+  const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;          // skip blanks & comments
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx === -1) continue;                                  // skip malformed lines
+    const key = trimmed.slice(0, eqIdx).trim();
+    const val = trimmed.slice(eqIdx + 1).trim()
+                       .replace(/^["']|["']$/g, '');            // strip optional quotes
+    if (key && !(key in process.env)) {                          // env var wins over .env
+      process.env[key] = val;
+    }
+  }
+  console.log('  [.env] Loaded environment from .env');
+})();
+
+// ──────────────────────────────────────────────────────────────
+//  IBM GRANITE CONFIGURATION  (reads from .env or environment)
+// ──────────────────────────────────────────────────────────────
+const IBM_API_KEY    = process.env.IBM_API_KEY    || '';
+const IBM_PROJECT_ID = process.env.IBM_PROJECT_ID || '';
 const IBM_REGION     = process.env.IBM_REGION     || 'us-south';
 const PORT           = parseInt(process.env.PORT) || 3000;
 
@@ -202,7 +226,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         // Check if API key is configured
-        if (IBM_API_KEY === 'YOUR_IBM_API_KEY_HERE' || !IBM_API_KEY) {
+        if (!IBM_API_KEY || IBM_API_KEY === 'YOUR_IBM_API_KEY_HERE') {
           res.writeHead(503, { 'Content-Type': 'application/json' });
           return res.end(JSON.stringify({
             error: 'IBM API key not configured. Set IBM_API_KEY and IBM_PROJECT_ID in server.js or as environment variables.',
@@ -239,7 +263,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  const apiConfigured = IBM_API_KEY !== 'YOUR_IBM_API_KEY_HERE' && IBM_API_KEY;
+  const apiConfigured = !!(IBM_API_KEY && IBM_API_KEY !== 'YOUR_IBM_API_KEY_HERE');
   console.log('');
   console.log('  ╔══════════════════════════════════════════════════════╗');
   console.log('  ║      Yogesh Portfolio Server — Running!              ║');
@@ -248,10 +272,10 @@ server.listen(PORT, () => {
   console.log(`  ║   AI API:  ${apiConfigured ? '✅ IBM Granite configured' : '⚠️  API key not set (fallback mode)'}  ║`);
   console.log('  ╠══════════════════════════════════════════════════════╣');
   if (!apiConfigured) {
-    console.log('  ║  To enable IBM Granite AI:                           ║');
-    console.log('  ║  1. Set IBM_API_KEY env var, OR                      ║');
-    console.log('  ║  2. Edit IBM_API_KEY in server.js line 23            ║');
-    console.log('  ║  3. Edit IBM_PROJECT_ID in server.js line 24         ║');
+    console.log('  ║  To enable IBM Granite AI, edit .env:                ║');
+    console.log('  ║    IBM_API_KEY=your_ibm_cloud_api_key                ║');
+    console.log('  ║    IBM_PROJECT_ID=your_watsonx_project_id            ║');
+    console.log('  ║  Get keys → https://cloud.ibm.com                   ║');
     console.log('  ╠══════════════════════════════════════════════════════╣');
   }
   console.log('  ║   Press Ctrl+C to stop the server                    ║');

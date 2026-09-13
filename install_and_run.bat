@@ -85,35 +85,59 @@ IF %MISSING% EQU 1 (
 echo  [OK] All required project files verified.
 
 :: ══════════════════════════════════════════════════════════════
-::  STEP 4 — IBM Granite AI Configuration (optional)
+::  STEP 4 — IBM Granite AI Configuration via .env
 :: ══════════════════════════════════════════════════════════════
 echo.
-echo  [4/5] Checking IBM Granite AI configuration...
+echo  [4/5] Checking IBM Granite AI configuration (.env)...
 echo.
 echo  ───────────────────────────────────────────────────────────────
-echo  IBM GRANITE AI ASSISTANT SETUP (OPTIONAL)
+echo  IBM GRANITE AI ASSISTANT — .env SETUP (RECOMMENDED)
 echo  ───────────────────────────────────────────────────────────────
-echo  The AI assistant works in FALLBACK mode without API keys.
-echo  To enable FULL IBM Granite AI responses:
 echo.
-echo    Option A — Set environment variables (recommended):
-echo      set IBM_API_KEY=your_ibm_cloud_api_key
-echo      set IBM_PROJECT_ID=your_watsonx_project_id
+echo  Edit the .env file in this folder and set your credentials:
 echo.
-echo    Option B — Edit server.js:
-echo      Line 23: IBM_API_KEY    = 'your_api_key_here'
-echo      Line 24: IBM_PROJECT_ID = 'your_project_id_here'
+echo    IBM_API_KEY=your_ibm_cloud_api_key_here
+echo    IBM_PROJECT_ID=your_watsonx_project_id_here
 echo.
-echo    Get your keys at: https://cloud.ibm.com
-echo    Create watsonx.ai project at: https://dataplatform.cloud.ibm.com
+echo  The server reads .env automatically on startup (no restart
+echo  needed after editing — just re-run this file).
+echo.
+echo  How to get your keys:
+echo    IBM API Key   → https://cloud.ibm.com  ^> Manage ^> Access ^> API Keys
+echo    Project ID    → https://dataplatform.cloud.ibm.com ^> your project ^> Settings
+echo.
+echo  ⚠  NEVER commit .env to git — it is already in .gitignore.
 echo  ───────────────────────────────────────────────────────────────
 echo.
 
-IF DEFINED IBM_API_KEY (
-    echo  [OK] IBM_API_KEY is set — IBM Granite AI will be active!
+:: Check .env file existence and whether IBM_API_KEY is set
+IF NOT EXIST ".env" (
+    echo  [WARNING] .env file not found.
+    echo            Please create a .env file in the same folder as this script.
+    echo.
+)
+
+:: Parse .env to check if IBM_API_KEY has been filled in
+set ENV_KEY_SET=0
+IF EXIST ".env" (
+    for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
+        if /i "%%A"=="IBM_API_KEY" (
+            if not "%%B"=="YOUR_IBM_API_KEY_HERE" (
+                if not "%%B"=="" (
+                    set ENV_KEY_SET=1
+                )
+            )
+        )
+    )
+)
+
+IF %ENV_KEY_SET% EQU 1 (
+    echo  [OK] IBM_API_KEY found in .env — IBM Granite AI will be active!
+) ELSE IF DEFINED IBM_API_KEY (
+    echo  [OK] IBM_API_KEY set as environment variable — IBM Granite AI will be active!
 ) ELSE (
-    echo  [INFO] IBM_API_KEY not set — running in intelligent fallback mode.
-    echo         The AI assistant will still answer questions using built-in knowledge.
+    echo  [INFO] IBM_API_KEY not configured — running in intelligent fallback mode.
+    echo         Edit .env to enable full IBM Granite responses.
 )
 echo.
 

@@ -64,3 +64,8 @@ yarn.lock
 *.tgz
 *.zip
 *.tar.gz
+
+# IBM Cloud API key file (credentials — never commit)
+apikey.json
+*apikey*.json
+*credentials*.json
