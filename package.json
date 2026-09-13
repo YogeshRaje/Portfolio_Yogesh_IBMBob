@@ -1,0 +1,13 @@
+{
+  "name": "yogesh-portfolio",
+  "version": "1.0.0",
+  "description": "Personal portfolio website for Yogesh — Agentic AI, ML & Quantum Computing Trainer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["portfolio", "agentic-ai", "machine-learning", "quantum-computing"],
+  "author": "Yogesh",
+  "license": "MIT"
+}

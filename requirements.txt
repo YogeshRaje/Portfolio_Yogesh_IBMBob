@@ -1,0 +1,129 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  Yogesh Portfolio — requirements.txt
+#
+#  Project: Personal Portfolio Website with IBM Granite Agentic AI
+#  Runtime: Node.js (JavaScript) — no Python runtime required
+#
+#  This file documents ALL software requirements for running and deploying
+#  the Yogesh Portfolio application.
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SECTION 1 — RUNTIME REQUIREMENTS (Node.js / JavaScript)
+#  These are satisfied by Node.js itself — zero npm packages needed.
+# ══════════════════════════════════════════════════════════════════════════════
+#
+#  node >= 18.0.0       (LTS recommended: 20.x or 22.x)
+#  npm  >= 8.0.0        (bundled with Node.js)
+#
+#  Node.js built-in modules used (no install required):
+#    http     — HTTP server for serving the portfolio
+#    https    — HTTPS client for IBM watsonx.ai API calls
+#    fs       — File system for reading index.html and assets
+#    path     — Path utilities for static file resolution
+#    url      — URL parsing for IBM IAM and watsonx endpoints
+#
+#  npm dependencies: NONE
+#  The project runs with zero external npm packages.
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SECTION 2 — IBM CLOUD / WATSONX.AI REQUIREMENTS
+#  External services consumed by the Agentic AI assistant
+# ══════════════════════════════════════════════════════════════════════════════
+#
+#  IBM Cloud Account
+#    URL:     https://cloud.ibm.com
+#    Plan:    Lite (free) or Pay-As-You-Go
+#
+#  IBM watsonx.ai Service
+#    URL:     https://dataplatform.cloud.ibm.com
+#    Region:  us-south (default; configurable via IBM_REGION env var)
+#
+#  IBM Granite Model
+#    Model ID:   ibm/granite-3-3-8b-instruct
+#    API:        watsonx.ai Text Chat REST API
+#    Version:    2023-05-29
+#    Endpoint:   https://us-south.ml.cloud.ibm.com/ml/v1/text/chat
+#
+#  Authentication
+#    Method:     IBM IAM OAuth 2.0 — API Key → Bearer Token
+#    Token URL:  https://iam.cloud.ibm.com/identity/token
+#    Token TTL:  3600 seconds (server caches and refreshes at 3400s)
+#
+#  Required Credentials (set as environment variables or in server.js):
+#    IBM_API_KEY      — IBM Cloud API Key (from Manage > Access > API Keys)
+#    IBM_PROJECT_ID   — watsonx.ai Project ID (from project settings)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SECTION 3 — OPTIONAL PYTHON TOOLS
+#  Only needed if you want to run scripts or extend with Python utilities
+# ══════════════════════════════════════════════════════════════════════════════
+#
+#  If using Python for data scripts, ML experiments, or Qiskit demos:
+#
+#  python >= 3.9
+#
+#  ibm-watsonx-ai >= 1.1.2        # IBM watsonx Python SDK
+#  ibm-cloud-sdk-core >= 3.18.0   # IBM Cloud core SDK
+#  requests >= 2.31.0             # HTTP requests
+#  python-dotenv >= 1.0.0         # .env file support
+#
+#  ML / AI:
+#  numpy >= 1.24.0
+#  pandas >= 2.0.0
+#  scikit-learn >= 1.3.0
+#  torch >= 2.0.0                 # PyTorch
+#  tensorflow >= 2.13.0           # TensorFlow
+#  transformers >= 4.35.0         # Hugging Face Transformers
+#  langchain >= 0.1.0             # LangChain for Agentic AI
+#  openai >= 1.0.0                # OpenAI-compatible client
+#
+#  Quantum Computing:
+#  qiskit >= 1.0.0                # IBM Qiskit
+#  qiskit-aer >= 0.13.0           # Qiskit simulator backend
+#  pennylane >= 0.35.0            # PennyLane quantum ML
+#
+#  NOTE: Python packages above are OPTIONAL reference — the portfolio
+#        web application itself requires only Node.js (see Section 1).
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SECTION 4 — DEVELOPMENT TOOLS (optional, for contributors)
+# ══════════════════════════════════════════════════════════════════════════════
+#
+#  git >= 2.40.0         — version control
+#  Visual Studio Code    — recommended IDE (https://code.visualstudio.com)
+#  Postman / Insomnia    — API testing for /api/chat endpoint
+#  Node.js 22 LTS        — recommended version
+#
+#  Recommended VS Code extensions:
+#    esbenp.prettier-vscode        — code formatting
+#    dbaeumer.vscode-eslint        — JavaScript linting
+#    yzhang.markdown-all-in-one    — Markdown editing
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SECTION 5 — DEPLOYMENT TARGETS
+# ══════════════════════════════════════════════════════════════════════════════
+#
+#  Local         : node server.js  (or install_and_run.bat on Windows)
+#  IBM Code Engine: ibmcloud CLI >= 2.x  +  ibmcloud ce plugin
+#  Docker        : Docker Desktop >= 4.x  (Node 18-alpine base image)
+#  Vercel        : vercel CLI >= 32.x
+#  Railway       : connect GitHub repo, set env vars
+#  Render        : connect GitHub repo, set env vars
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  SECTION 6 — SYSTEM REQUIREMENTS
+# ══════════════════════════════════════════════════════════════════════════════
+#
+#  OS:      Windows 10/11, macOS 12+, Ubuntu 20.04+
+#  RAM:     512 MB minimum (Node.js server is lightweight)
+#  Disk:    < 1 MB (no node_modules; all built-in)
+#  Network: Required for IBM watsonx.ai API calls
+#  Port:    3000 (configurable via PORT env var)
+#  Browser: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
