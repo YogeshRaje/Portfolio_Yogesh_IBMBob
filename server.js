@@ -6,7 +6,7 @@
  *   1. Edit .env in the project root and set your IBM credentials:
  *        IBM_API_KEY      — your IBM Cloud API key
  *        IBM_PROJECT_ID   — your watsonx.ai project ID
- *   2. Run: node server.js
+ *   2. Run: node server.js   (or double-click install_and_run.bat)
  *   3. Open: http://localhost:3000
  */
 
@@ -47,10 +47,28 @@ const url   = require('url');
 // ──────────────────────────────────────────────────────────────
 const IBM_API_KEY    = process.env.IBM_API_KEY    || '';
 const IBM_PROJECT_ID = process.env.IBM_PROJECT_ID || '';
-const IBM_REGION     = process.env.IBM_REGION     || 'us-south';
 const PORT           = parseInt(process.env.PORT) || 3000;
 
-const WATSONX_URL    = `https://${IBM_REGION}.ml.cloud.ibm.com/ml/v1/text/chat?version=2023-05-29`;
+// Normalise region: accept either a short code (us-south) or a full URL
+// and always resolve to just the hostname component for URL construction.
+let IBM_REGION_HOST  = 'us-south.ml.cloud.ibm.com';
+const rawRegion = (process.env.IBM_REGION || 'us-south').trim();
+if (rawRegion.startsWith('http')) {
+  // e.g. "https://us-south.ml.cloud.ibm.com" — extract hostname
+  try {
+    IBM_REGION_HOST = new url.URL(rawRegion).hostname;
+  } catch (_) {
+    IBM_REGION_HOST = 'us-south.ml.cloud.ibm.com';
+  }
+} else if (rawRegion.includes('.ml.cloud.ibm.com')) {
+  // e.g. "us-south.ml.cloud.ibm.com"
+  IBM_REGION_HOST = rawRegion;
+} else {
+  // e.g. "us-south" → construct full hostname
+  IBM_REGION_HOST = `${rawRegion}.ml.cloud.ibm.com`;
+}
+
+const WATSONX_PATH   = '/ml/v1/text/chat?version=2023-05-29';
 const IAM_URL        = 'https://iam.cloud.ibm.com/identity/token';
 const GRANITE_MODEL  = 'ibm/granite-3-3-8b-instruct';
 
@@ -84,19 +102,18 @@ function getIAMToken() {
     }
 
     const postData = `grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=${encodeURIComponent(IBM_API_KEY)}`;
-    const options  = {
-      method:  'POST',
-      headers: {
+    const iamParsed = new url.URL(IAM_URL);
+    const options   = {
+      hostname: iamParsed.hostname,
+      path:     iamParsed.pathname + iamParsed.search,
+      port:     443,
+      method:   'POST',
+      headers:  {
         'Content-Type':   'application/x-www-form-urlencoded',
         'Accept':         'application/json',
         'Content-Length': Buffer.byteLength(postData),
       },
     };
-
-    const parsed = new url.URL(IAM_URL);
-    options.hostname = parsed.hostname;
-    options.path     = parsed.pathname + parsed.search;
-    options.port     = 443;
 
     const req = https.request(options, res => {
       let body = '';
@@ -105,11 +122,11 @@ function getIAMToken() {
         try {
           const json = JSON.parse(body);
           if (json.access_token) {
-            cachedToken  = json.access_token;
-            tokenExpiry  = Date.now() + 3400 * 1000; // refresh 200s before expiry
+            cachedToken = json.access_token;
+            tokenExpiry = Date.now() + 3400 * 1000; // refresh 200s before expiry
             resolve(cachedToken);
           } else {
-            reject(new Error('IAM token error: ' + (json.errorMessage || body)));
+            reject(new Error('IAM token error: ' + (json.errorMessage || json.error || body.slice(0, 200))));
           }
         } catch (e) {
           reject(new Error('Failed to parse IAM response: ' + body.slice(0, 200)));
@@ -125,25 +142,28 @@ function getIAMToken() {
 // ──────────────────────────────────────────────────────────────
 //  IBM GRANITE CHAT COMPLETION
 // ──────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are an intelligent AI assistant embedded in the personal portfolio of YOGESH, a world-class Technical Trainer specialising in Agentic AI, Machine Learning, and Quantum Computing. You are powered by IBM Granite (ibm/granite-3-3-8b-instruct) via IBM watsonx.ai.
+const SYSTEM_PROMPT = `You are an intelligent AI assistant embedded in the personal portfolio of YOGESH RAJE, a world-class Technical Trainer specialising in Agentic AI, Machine Learning, and Quantum Computing. You are powered by IBM Granite (ibm/granite-3-3-8b-instruct) via IBM watsonx.ai.
 
-Your persona: Professional, knowledgeable, and encouraging. You represent Yogesh's brand and values.
+Your persona: Professional, knowledgeable, and encouraging. You represent Yogesh Raje's brand and values.
 
-Yogesh's profile:
+Yogesh Raje's profile:
 - Expert Technical Trainer: Agentic AI, Machine Learning, Quantum Computing
 - 500+ professionals trained, 98% satisfaction rate, 50+ workshops delivered
 - Based in Pune, Maharashtra, India
-- Email: yogesh@aigenius.in | LinkedIn: linkedin.com/in/yogesh-ai-trainer
+- Email: yogesh.raje@aigenius.in | LinkedIn: linkedin.com/in/yogeshraje
+- GitHub: github.com/YogeshRaje | Portfolio: https://github.com/YogeshRaje/Portfolio_Yogesh_IBMBob
 - Programs: AI Foundations Bootcamp (40h, Beginner), Applied Machine Learning (60h, Intermediate), Agentic AI Masterclass (48h, Advanced), Quantum Computing Intensive (36h, Advanced), LLMs & Prompt Engineering (24h, Intermediate), Enterprise Custom Training (Flexible)
+- Expertise: IBM Granite, watsonx.ai, LangChain, AutoGen, CrewAI, RAG, Qiskit, PennyLane, TensorFlow, PyTorch
 
 Instructions:
-- Answer questions about Yogesh's training programs, expertise, and contact details accurately
+- Answer questions about Yogesh Raje's training programs, expertise, and contact details accurately
 - Answer technical questions about Agentic AI, Machine Learning, and Quantum Computing clearly and concisely
-- For booking requests, always direct the user to the contact form on the portfolio or to yogesh@aigenius.in
+- For booking requests, always direct the user to the contact form on the portfolio or to yogesh.raje@aigenius.in
 - Use **bold** for key terms and - for bullet lists when it aids clarity
 - Keep responses concise (under 250 words) and action-oriented
-- Never fabricate Yogesh's credentials or promise specific pricing
-- Always be encouraging and professional`;
+- Never fabricate Yogesh Raje's credentials or promise specific pricing
+- Always be encouraging and professional
+- This portfolio was built using the Agentic AI SDLC methodology with IBM Bob AI assistance`;
 
 function callGranite(messages) {
   return new Promise(async (resolve, reject) => {
@@ -155,24 +175,23 @@ function callGranite(messages) {
     }
 
     const payload = JSON.stringify({
-      model_id: GRANITE_MODEL,
+      model_id:   GRANITE_MODEL,
       project_id: IBM_PROJECT_ID,
-      messages: [
+      messages:   [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages,
       ],
       parameters: {
-        max_new_tokens: 600,
-        temperature:    0.7,
-        top_p:          0.95,
+        max_new_tokens:     600,
+        temperature:        0.7,
+        top_p:              0.95,
         repetition_penalty: 1.1,
       },
     });
 
-    const parsed  = new url.URL(WATSONX_URL);
     const options = {
-      hostname: parsed.hostname,
-      path:     parsed.pathname + parsed.search,
+      hostname: IBM_REGION_HOST,
+      path:     WATSONX_PATH,
       port:     443,
       method:   'POST',
       headers:  {
@@ -189,13 +208,19 @@ function callGranite(messages) {
       res.on('end', () => {
         try {
           const json = JSON.parse(body);
-          const text = json?.results?.[0]?.generated_text
-                    || json?.choices?.[0]?.message?.content
-                    || null;
+          // watsonx.ai text/chat returns: { choices: [{ message: { content: "..." } }] }
+          // Also handle legacy results[0].generated_text format
+          const text =
+            json?.choices?.[0]?.message?.content   ||   // OpenAI-compatible chat format
+            json?.results?.[0]?.generated_text       ||  // watsonx generate format
+            null;
+
           if (text) {
             resolve(text.trim());
           } else {
-            reject(new Error('Unexpected Granite response: ' + body.slice(0, 300)));
+            // Surface a useful error from the API response if present
+            const apiErr = json?.error?.message || json?.message || JSON.stringify(json).slice(0, 300);
+            reject(new Error('Unexpected Granite response: ' + apiErr));
           }
         } catch (e) {
           reject(new Error('Failed to parse Granite response: ' + body.slice(0, 200)));
@@ -213,6 +238,15 @@ function callGranite(messages) {
 // ──────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
 
+  // ── CORS headers (allow browser fetch from same origin) ──
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    return res.end();
+  }
+
   // ── POST /api/chat — Agentic AI endpoint ──
   if (req.method === 'POST' && req.url === '/api/chat') {
     let body = '';
@@ -229,7 +263,7 @@ const server = http.createServer(async (req, res) => {
         if (!IBM_API_KEY || IBM_API_KEY === 'YOUR_IBM_API_KEY_HERE') {
           res.writeHead(503, { 'Content-Type': 'application/json' });
           return res.end(JSON.stringify({
-            error: 'IBM API key not configured. Set IBM_API_KEY and IBM_PROJECT_ID in server.js or as environment variables.',
+            error: 'IBM API key not configured. Set IBM_API_KEY and IBM_PROJECT_ID in .env',
             fallback: true,
           }));
         }
@@ -248,14 +282,28 @@ const server = http.createServer(async (req, res) => {
   }
 
   // ── Static file server ──
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+  let reqPath  = req.url.split('?')[0]; // strip query string
+  let filePath = path.join(__dirname, reqPath === '/' ? 'index.html' : reqPath);
   const ext    = path.extname(filePath) || '.html';
   const contentType = MIME[ext] || 'text/plain';
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      return res.end('404 — File Not Found');
+      // Fallback to index.html for SPA-style routing
+      if (err.code === 'ENOENT') {
+        fs.readFile(path.join(__dirname, 'index.html'), (err2, data2) => {
+          if (err2) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            return res.end('404 — File Not Found');
+          }
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(data2);
+        });
+      } else {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Server Error');
+      }
+      return;
     }
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(data);
@@ -263,13 +311,15 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  const apiConfigured = !!(IBM_API_KEY && IBM_API_KEY !== 'YOUR_IBM_API_KEY_HERE');
+  const apiConfigured = !!(IBM_API_KEY && IBM_API_KEY !== 'YOUR_IBM_API_KEY_HERE' && IBM_PROJECT_ID);
   console.log('');
   console.log('  ╔══════════════════════════════════════════════════════╗');
   console.log('  ║      Yogesh Portfolio Server — Running!              ║');
   console.log('  ╠══════════════════════════════════════════════════════╣');
   console.log(`  ║   Local:   http://localhost:${PORT}                    ║`);
-  console.log(`  ║   AI API:  ${apiConfigured ? '✅ IBM Granite configured' : '⚠️  API key not set (fallback mode)'}  ║`);
+  console.log(`  ║   Model:   ${GRANITE_MODEL}     ║`);
+  console.log(`  ║   Region:  ${IBM_REGION_HOST.padEnd(42)}║`);
+  console.log(`  ║   AI API:  ${apiConfigured ? '✅ IBM Granite fully configured!    ' : '⚠️  API key/project not set         '}  ║`);
   console.log('  ╠══════════════════════════════════════════════════════╣');
   if (!apiConfigured) {
     console.log('  ║  To enable IBM Granite AI, edit .env:                ║');

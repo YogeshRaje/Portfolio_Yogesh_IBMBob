@@ -1,7 +1,8 @@
 # ──────────────────────────────────────────────────────────────────────────────
-#  Yogesh Portfolio — requirements.txt
+#  Yogesh Raje Portfolio — requirements.txt
 #
 #  Project: Personal Portfolio Website with IBM Granite Agentic AI
+#  Owner:   Yogesh Raje — Technical Trainer | Agentic AI · ML · Quantum Computing
 #  Runtime: Node.js (JavaScript) — no Python runtime required
 #
 #  This file documents ALL software requirements for running and deploying

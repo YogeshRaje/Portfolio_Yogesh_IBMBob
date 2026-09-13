@@ -1,11 +1,11 @@
 @echo off
-title Yogesh Portfolio — AI-Powered Setup and Launch
+title Yogesh Raje Portfolio — AI-Powered Setup and Launch
 color 0A
 chcp 65001 > nul 2>&1
 
 echo.
 echo  ╔══════════════════════════════════════════════════════════════╗
-echo  ║     YOGESH — Personal Portfolio Website                     ║
+echo  ║     YOGESH RAJE — Personal Portfolio Website                ║
 echo  ║     Agentic AI  .  Machine Learning  .  Quantum Computing   ║
 echo  ║     Powered by IBM Granite  .  ibm/granite-3-3-8b-instruct  ║
 echo  ╚══════════════════════════════════════════════════════════════╝
@@ -20,13 +20,13 @@ IF %ERRORLEVEL% NEQ 0 (
     echo.
     echo  [ERROR] Node.js is not installed or not found in PATH.
     echo.
-    echo  ───────────────────────────────────────────────────────────
+    echo  ─────────────────────────────────────────────────────────────
     echo  HOW TO INSTALL NODE.JS:
     echo    1. Open your browser and go to: https://nodejs.org
     echo    2. Download the LTS version (recommended)
     echo    3. Run the installer with default settings
-    echo    4. Restart this window and run this file again
-    echo  ───────────────────────────────────────────────────────────
+    echo    4. RESTART this window and run this file again
+    echo  ─────────────────────────────────────────────────────────────
     echo.
     pause
     exit /b 1
@@ -71,7 +71,7 @@ IF NOT EXIST "package.json" (
     set MISSING=1
 )
 IF NOT EXIST "SDLC_PLAN.md" (
-    echo  [WARNING] SDLC_PLAN.md — Agentic AI SDLC documentation (optional)
+    echo  [INFO] SDLC_PLAN.md — Agentic AI SDLC documentation (optional)
 )
 
 IF %MISSING% EQU 1 (
@@ -90,35 +90,28 @@ echo  [OK] All required project files verified.
 echo.
 echo  [4/5] Checking IBM Granite AI configuration (.env)...
 echo.
-echo  ───────────────────────────────────────────────────────────────
-echo  IBM GRANITE AI ASSISTANT — .env SETUP (RECOMMENDED)
-echo  ───────────────────────────────────────────────────────────────
-echo.
-echo  Edit the .env file in this folder and set your credentials:
-echo.
-echo    IBM_API_KEY=your_ibm_cloud_api_key_here
-echo    IBM_PROJECT_ID=your_watsonx_project_id_here
-echo.
-echo  The server reads .env automatically on startup (no restart
-echo  needed after editing — just re-run this file).
-echo.
-echo  How to get your keys:
-echo    IBM API Key   → https://cloud.ibm.com  ^> Manage ^> Access ^> API Keys
-echo    Project ID    → https://dataplatform.cloud.ibm.com ^> your project ^> Settings
-echo.
-echo  ⚠  NEVER commit .env to git — it is already in .gitignore.
-echo  ───────────────────────────────────────────────────────────────
-echo.
+echo  ─────────────────────────────────────────────────────────────────
+echo  IBM GRANITE AI ASSISTANT — CREDENTIALS STATUS
+echo  ─────────────────────────────────────────────────────────────────
 
-:: Check .env file existence and whether IBM_API_KEY is set
+:: Check .env file existence
 IF NOT EXIST ".env" (
     echo  [WARNING] .env file not found.
-    echo            Please create a .env file in the same folder as this script.
+    echo            Creating a template .env — please fill in your credentials.
     echo.
+    (
+        echo # Yogesh Portfolio .env
+        echo IBM_API_KEY=YOUR_IBM_API_KEY_HERE
+        echo IBM_PROJECT_ID=YOUR_PROJECT_ID_HERE
+        echo IBM_REGION=us-south
+        echo PORT=3000
+    ) > .env
 )
 
-:: Parse .env to check if IBM_API_KEY has been filled in
+:: Parse .env to check if IBM_API_KEY and IBM_PROJECT_ID are configured
 set ENV_KEY_SET=0
+set ENV_PROJ_SET=0
+
 IF EXIST ".env" (
     for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
         if /i "%%A"=="IBM_API_KEY" (
@@ -128,17 +121,48 @@ IF EXIST ".env" (
                 )
             )
         )
+        if /i "%%A"=="IBM_PROJECT_ID" (
+            if not "%%B"=="YOUR_PROJECT_ID_HERE" (
+                if not "%%B"=="" (
+                    set ENV_PROJ_SET=1
+                )
+            )
+        )
     )
 )
 
 IF %ENV_KEY_SET% EQU 1 (
-    echo  [OK] IBM_API_KEY found in .env — IBM Granite AI will be active!
+    echo  [OK] IBM_API_KEY    : configured in .env
 ) ELSE IF DEFINED IBM_API_KEY (
-    echo  [OK] IBM_API_KEY set as environment variable — IBM Granite AI will be active!
+    echo  [OK] IBM_API_KEY    : set as environment variable
+    set ENV_KEY_SET=1
 ) ELSE (
-    echo  [INFO] IBM_API_KEY not configured — running in intelligent fallback mode.
-    echo         Edit .env to enable full IBM Granite responses.
+    echo  [WARN] IBM_API_KEY    : not set — running in fallback mode
 )
+
+IF %ENV_PROJ_SET% EQU 1 (
+    echo  [OK] IBM_PROJECT_ID : configured in .env
+) ELSE IF DEFINED IBM_PROJECT_ID (
+    echo  [OK] IBM_PROJECT_ID : set as environment variable
+    set ENV_PROJ_SET=1
+) ELSE (
+    echo  [WARN] IBM_PROJECT_ID : not set — running in fallback mode
+)
+
+echo.
+
+IF %ENV_KEY_SET% EQU 1 IF %ENV_PROJ_SET% EQU 1 (
+    echo  [IBM GRANITE] ACTIVE — Full AI responses powered by IBM Granite!
+) ELSE (
+    echo  [IBM GRANITE] FALLBACK MODE — AI will use intelligent pre-built responses.
+    echo.
+    echo  To enable full IBM Granite AI:
+    echo    1. Edit .env in this folder
+    echo    2. Set IBM_API_KEY and IBM_PROJECT_ID
+    echo    3. Get keys at: https://cloud.ibm.com
+)
+echo.
+echo  ─────────────────────────────────────────────────────────────────
 echo.
 
 :: ══════════════════════════════════════════════════════════════
@@ -147,24 +171,32 @@ echo.
 echo  [5/5] Starting Yogesh Portfolio server...
 echo.
 echo  ╔══════════════════════════════════════════════════════════════╗
-echo  ║  Server is starting on http://localhost:3000                 ║
-echo  ║  Your browser will open automatically in 2 seconds          ║
+echo  ║   Server starting on: http://localhost:3000                  ║
+echo  ║   Browser opens automatically in 3 seconds                  ║
 echo  ║                                                              ║
-echo  ║  Features:                                                   ║
-echo  ║  ● Portfolio: About, Expertise, Skills, Programs             ║
-echo  ║  ● Testimonials, Contact Form                                ║
-echo  ║  ● AI Chat Widget (IBM Granite / Fallback Mode)              ║
+echo  ║   Portfolio Sections:                                        ║
+echo  ║   • Hero · About · Expertise · Skills                       ║
+echo  ║   • Training Programs · Testimonials · Contact              ║
 echo  ║                                                              ║
-echo  ║  Press Ctrl+C in this window to stop the server             ║
+echo  ║   AI Features (IBM Granite):                                 ║
+echo  ║   • Floating Chat Widget (bottom-right)                      ║
+echo  ║   • Ask AI Assistant button in nav                           ║
+echo  ║   • Multi-turn conversation with memory                      ║
+echo  ║   • Model: ibm/granite-3-3-8b-instruct                      ║
+echo  ║                                                              ║
+echo  ║   Press Ctrl+C in this window to stop the server            ║
 echo  ╚══════════════════════════════════════════════════════════════╝
 echo.
 
-:: Open browser after 2 seconds
-start "" cmd /c "timeout /t 2 >nul && start http://localhost:3000"
+:: Open browser after 3 seconds
+start "" cmd /c "timeout /t 3 >nul && start http://localhost:3000"
 
 :: Start the Node.js server (this window stays open showing logs)
 node server.js
 
 echo.
-echo  Server stopped.
+echo  ─────────────────────────────────────────────────────────────────
+echo  Server stopped. Press any key to exit.
+echo  ─────────────────────────────────────────────────────────────────
+echo.
 pause

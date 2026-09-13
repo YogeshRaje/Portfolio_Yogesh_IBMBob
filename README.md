@@ -1,4 +1,4 @@
-# 🧠 Yogesh — Personal Portfolio Website
+# 🧠 Yogesh Raje — Personal Portfolio Website
 
 > **Technical Trainer · Agentic AI · Machine Learning · Quantum Computing**  
 > Powered by **IBM Granite** (`ibm/granite-3-3-8b-instruct`) via **IBM watsonx.ai**
@@ -31,7 +31,7 @@
 
 ## Overview
 
-A **full-stack personal portfolio web application** for Yogesh — an expert Technical Trainer specialising in:
+A **full-stack personal portfolio web application** for **Yogesh Raje** — an expert Technical Trainer specialising in:
 
 | Domain | Topics |
 |--------|--------|
@@ -39,7 +39,7 @@ A **full-stack personal portfolio web application** for Yogesh — an expert Tec
 | 📊 **Machine Learning** | Deep Learning, NLP, MLOps, TensorFlow, PyTorch, Scikit-learn |
 | ⚛️ **Quantum Computing** | Qiskit, PennyLane, VQE, QAOA, Quantum ML, Shor's & Grover's |
 
-The application includes a **floating IBM Granite–powered AI assistant** that uses an **Agentic PAAR loop** (Perceive → Assess → Act → Reflect) to answer visitors' queries about training programs, expertise, booking, and technical topics in real time.
+The application includes a **floating IBM Granite–powered AI assistant** that uses an **Agentic PAAR loop** (Perceive → Assess → Act → Reflect) to answer visitors' queries about training programs, expertise, booking, and technical topics in real time. Built following all phases of the **Agentic AI SDLC** with **IBM Bob AI assistance**.
 
 > Built following all phases of the **Agentic AI SDLC** — see [`SDLC_PLAN.md`](SDLC_PLAN.md) for the full plan.
 
@@ -344,12 +344,13 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ## Author
 
-**Yogesh** — Technical Trainer  
+**Yogesh Raje** — Technical Trainer
 🤖 Agentic AI &nbsp;·&nbsp; 📊 Machine Learning &nbsp;·&nbsp; ⚛️ Quantum Computing
 
-- 📧 yogesh@aigenius.in
+- 📧 yogesh.raje@aigenius.in
 - 📍 Pune, Maharashtra, India
-- 🔗 [linkedin.com/in/yogesh-ai-trainer](https://linkedin.com/in/yogesh-ai-trainer)
+- 🔗 [linkedin.com/in/yogeshraje](https://linkedin.com/in/yogeshraje)
+- 🐙 [github.com/YogeshRaje](https://github.com/YogeshRaje)
 - 🌐 [Portfolio](https://github.com/YogeshRaje/Portfolio_Yogesh_IBMBob)
 
 ---
